@@ -29,10 +29,14 @@ import { toast } from 'react-toastify';
 // import { useState,useEffect } from 'react';
 // import { apiget, apipost } from '../../service/api';
 import Palette from '../../ui-component/ThemePalette';
-import { addTest } from 'views/api/apiClient';
+import { addTest, findTest } from 'views/api/apiClient';
+import { useEffect } from 'react';
+import { useState } from 'react';
+import { responsivePropType } from '@mui/system';
 
 const AddTest = (props) => {
-  const { open, handleClose } = props;
+  const { open, handleClose, findTest } = props;
+  const [testData, setTestData] = useState([]);
   // const [user, setUser] = useState([]);
 
   // const userid = localStorage.getItem('user_id');
@@ -55,49 +59,35 @@ const AddTest = (props) => {
   const initialValues = {
     status: '',
     title: '',
-    max_marks: '',
-    max_time: '',
+    max_marks: 100,
+    max_time: 60,
     is_nagative_marking: false,
     is_scheduled: false,
     date_time: '',
-    buffer_time: ''
+    buffer_time: 0
   };
 
-  // add Lead api
-  // const addLead = async (values) => {
-  //   const data = values;
-
-  //   const result = await apipost('lead/add', data);
-  //   setUserAction(result);
-
-  //   if (result && result.status === 201) {
-  //     formik.resetForm();
-  //     handleClose();
-  //     toast.success(result.data.message);
-  //   }
-  // };
-
-  // formik
   const formik = useFormik({
     initialValues,
     validationSchema,
-    onSubmit: async (values) => {
-      console.log("values",values)
-      const response = await addTest(values)
-      handleClose();
-      toast.success('lead Add successfully');
+    onSubmit: async (values, { resetForm }) => {
+      const response = await addTest(values);
+      console.log("response",response?.status)
+      if (response?.status == 201) {
+        findTest();
+        resetForm(); 
+        handleClose();
+        toast.success('Test Added Successfully ');
+      }else{
+        toast.error('Something Went Wrong');
+
+      }
     }
   });
 
-
   return (
     <div>
-      <Dialog
-        open={open}
-        onClose={handleClose}
-        aria-labelledby="scroll-dialog-title"
-        aria-describedby="scroll-dialog-description"
-      >
+      <Dialog open={open} onClose={handleClose} aria-labelledby="scroll-dialog-title" aria-describedby="scroll-dialog-description">
         <DialogTitle
           id="scroll-dialog-title"
           style={{
@@ -201,7 +191,7 @@ const AddTest = (props) => {
                 <Grid item xs={6}>
                   <FormControl fullWidth>
                     <RadioGroup row name="is_scheduled" onChange={formik.handleChange} value={formik.values.is_scheduled}>
-                      <FormControlLabel value={true}label="scheduled" control={<Radio />}  />
+                      <FormControlLabel value={true} label="scheduled" control={<Radio />} />
                     </RadioGroup>
                     <FormHelperText style={{ color: Palette.error.main }}>
                       {formik.touched.is_scheduled && formik.errors.is_scheduled}

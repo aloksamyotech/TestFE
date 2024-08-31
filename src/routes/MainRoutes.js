@@ -3,10 +3,11 @@ import { lazy } from 'react';
 // project imports
 import MainLayout from 'layout/MainLayout';
 import Loadable from 'ui-component/Loadable';
+import ViewTest from 'views/Test/view';
 
 // dashboard routing
 const DashboardDefault = Loadable(lazy(() => import('views/dashboard/Default')));
-const LeadManagement = Loadable(lazy(() => import('views/Lead')));
+const LeadManagement = Loadable(lazy(() => import('views/Test')));
 const ContactManagement = Loadable(lazy(() => import('views/Contact')));
 const Call = Loadable(lazy(() => import('views/Calls')));
 const Policy = Loadable(lazy(() => import('views/Policy')));
@@ -133,6 +134,15 @@ const MainRoutes = {
         {
           path: 'emailtemplate',
           element: <EmailTemplates />
+        }
+      ]
+    },
+    {
+      path: 'dashboard',
+      children: [
+        {
+          path: 'view/test/:id',
+          element: <ViewTest />
         }
       ]
     },

@@ -2,30 +2,19 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { useState } from 'react';
 // @mui
-import { Stack, Button, Container, Typography, Box, Card } from '@mui/material';
+import { Stack, Button, Container, Typography, Box, Card, IconButton } from '@mui/material';
 import { DataGrid, GridToolbar } from '@mui/x-data-grid';
 
 import Iconify from '../../ui-component/iconify';
 import TableStyle from '../../ui-component/TableStyle';
 import AddLead from './AddTest.js';
-
-// ----------------------------------------------------------------------
-
-const leadData = [
-  {
-    id: 1,
-    title: 'monthly assessment',
-    status: 'inactive',
-    max_marks: '100',
-    max_time: '30 minute',
-    scheduled: true,
-    negative: true,
-    edit: 'Edit'
-  }
-];
+import { findTest } from 'views/api/apiClient';
+import { useEffect } from 'react';
+import { Link } from 'react-router-dom';
 
 const Lead = () => {
   const [openAdd, setOpenAdd] = useState(false);
+  const [leadData, setLeadData] = useState([]);
   const columns = [
     {
       field: 'title',
@@ -62,16 +51,44 @@ const Lead = () => {
     {
       field: 'action',
       headerName: 'Action',
-      flex: 1
-      // eslint-disable-next-line arrow-body-style
+      flex: 1,
+      renderCell: (params) => (
+        <IconButton component={Link} to={`/dashboard/view/test/${params.row.id}`} color="primary">
+          <Iconify icon="eva:eye-outline" />
+        </IconButton>
+      )
     }
   ];
 
   const handleOpenAdd = () => setOpenAdd(true);
   const handleCloseAdd = () => setOpenAdd(false);
+
+  async function findTestData() {
+    const response = await findTest();
+    const dataGrid =
+      response &&
+      response?.map((item, index) => {
+        return {
+          id: item?._id,
+          title: item?.title,
+          status: item?.status,
+          max_marks: item?.max_marks,
+          max_time: item?.max_time,
+          scheduled: item?.is_scheduled,
+          negative: item?.is_nagative_marking,
+          action: ``
+        };
+      });
+
+    setLeadData(dataGrid);
+  }
+
+  useEffect(() => {
+    findTestData();
+  }, []);
   return (
     <>
-      <AddLead open={openAdd} handleClose={handleCloseAdd} />
+      <AddLead open={openAdd} handleClose={handleCloseAdd} findTest={findTestData} />
       <Container>
         <Stack direction="row" alignItems="center" mb={5} justifyContent={'space-between'}>
           <Typography variant="h4">Lead-Management</Typography>
